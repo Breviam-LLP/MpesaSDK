@@ -20,30 +20,37 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Laravel 9 (LTS) - PHP 8.1, 8.2
           - php: '8.1'
-            laravel: '9.*'
-            testbench: '7.*'
+            laravel: '^9.0'
+            testbench: '^7.0'
+            stability: stable
+          - php: '8.2'
+            laravel: '^9.0'
+            testbench: '^7.0'
+            stability: stable
+          # Laravel 10 - PHP 8.1, 8.2, 8.3
           - php: '8.1'
-            laravel: '10.*'
-            testbench: '8.*'
+            laravel: '^10.0'
+            testbench: '^8.0'
+            stability: stable
           - php: '8.2'
-            laravel: '9.*'
-            testbench: '7.*'
+            laravel: '^10.0'
+            testbench: '^8.0'
+            stability: stable
+          - php: '8.3'
+            laravel: '^10.0'
+            testbench: '^8.0'
+            stability: stable
+          # Laravel 11 - PHP 8.2, 8.3
           - php: '8.2'
-            laravel: '10.*'
-            testbench: '8.*'
-          - php: '8.2'
-            laravel: '11.*'
-            testbench: '9.*'
+            laravel: '^11.0'
+            testbench: '^9.0'
+            stability: stable
           - php: '8.3'
-            laravel: '9.*'
-            testbench: '7.*'
-          - php: '8.3'
-            laravel: '10.*'
-            testbench: '8.*'
-          - php: '8.3'
-            laravel: '11.*'
-            testbench: '9.*'
+            laravel: '^11.0'
+            testbench: '^9.0'
+            stability: stable
     
     steps:
       - name: Checkout code
@@ -67,15 +74,40 @@ jobs:
             
       - name: Install dependencies
         run: |
+          # Show initial state
+          echo "=== Initial Composer State ==="
+          composer --version
+          php -v | head -n 1
+          
+          # Remove lock file to avoid version conflicts
+          echo "=== Removing lock file and vendor ==="
           rm -f composer.lock
+          rm -rf vendor
+          
+          # Show target versions
+          echo "=== Target Versions ==="
+          echo "PHP: ${{ matrix.php }}"
+          echo "Laravel: ${{ matrix.laravel }}"
+          echo "Testbench: ${{ matrix.testbench }}"
+          
+          # Update composer.json constraints temporarily
+          echo "=== Updating requirements ==="
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          composer update --prefer-dist --no-interaction
+          
+          # Install with fresh resolution
+          echo "=== Installing dependencies ==="
+          composer update --prefer-dist --no-interaction --with-all-dependencies
+          
+          # Verify installation
+          echo "=== Verifying installation ==="
+          composer show laravel/framework
+          composer show orchestra/testbench
           
       - name: Run tests
         run: vendor/bin/phpunit --coverage-clover=coverage.xml
         
       - name: Upload coverage to Codecov
-        if: matrix.php == '8.3' && matrix.laravel == '11.*'
+        if: matrix.php == '8.3' && matrix.laravel == '^11.0'
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
