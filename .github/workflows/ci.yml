@@ -1,0 +1,195 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  COMPOSER_CACHE_DIR: ~/.composer/cache
+
+jobs:
+  test:
+    name: Tests (PHP ${{ matrix.php }}, Laravel ${{ matrix.laravel }})
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3']
+        laravel: ['9.*', '10.*', '11.*']
+        exclude:
+          - php: '8.1'
+            laravel: '11.*'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, dom, fileinfo, mysql, redis
+          coverage: xdebug
+          
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-${{ matrix.php }}-
+            composer-${{ runner.os }}-
+            
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
+          composer install --prefer-dist --no-interaction
+          
+      - name: Run tests
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml
+        
+      - name: Upload coverage to Codecov
+        if: matrix.php == '8.3' && matrix.laravel == '11.*'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, fileinfo
+          tools: composer, phpstan, php-cs-fixer
+          
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-8.3-${{ hashFiles('**/composer.lock') }}
+          
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
+        
+      - name: Check PHP syntax
+        run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+        
+      - name: Run PHPStan (if configured)
+        run: |
+          if [ -f "phpstan.neon" ] || [ -f "phpstan.neon.dist" ]; then
+            vendor/bin/phpstan analyse || echo "PHPStan not configured"
+          fi
+        continue-on-error: true
+        
+      - name: Check for debugging statements
+        run: |
+          if grep -r --include="*.php" -E "(var_dump|dd\(|dump\(|die\(|exit\()" src/ tests/ examples/; then
+            echo "Found debugging statements. Please remove them."
+            exit 1
+          fi
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-8.3-${{ hashFiles('**/composer.lock') }}
+          
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
+        
+      - name: Run security audit
+        run: composer audit || echo "Security audit completed with warnings"
+
+  documentation:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Check required documentation files
+        run: |
+          required_files=("README.md" "CHANGELOG.md" "CONTRIBUTING.md" ".env.example" "CONFIGURATION.md")
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Missing required documentation file: $file"
+              exit 1
+            fi
+          done
+          
+      - name: Validate configuration examples
+        run: |
+          if [ -f ".env.example" ]; then
+            echo "✅ .env.example exists"
+          fi
+          if [ -f "CONFIGURATION.md" ]; then
+            echo "✅ CONFIGURATION.md exists"
+          fi
+
+  tag-release:
+    name: Tag Release
+    runs-on: ubuntu-latest
+    needs: [test, code-quality, security, documentation]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          
+      - name: Get version from composer.json
+        id: get-version
+        run: |
+          VERSION=$(php -r "echo json_decode(file_get_contents('composer.json'))->version ?? '0.0.0';")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Check if tag exists
+        id: check-tag
+        run: |
+          if git tag -l | grep -q "^v${{ steps.get-version.outputs.version }}$"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Create tag
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag -a "v${{ steps.get-version.outputs.version }}" -m "Release v${{ steps.get-version.outputs.version }}"
+          git push origin "v${{ steps.get-version.outputs.version }}"

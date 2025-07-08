@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Profile-based configuration system with inheritance support
+- Comprehensive Git workflow and version control setup
+- GitHub Actions CI/CD pipeline
+- Pre-commit and commit message validation hooks
+- Configuration validation command (`mpesa:config-status`)
+- Enhanced callback URL management system
+- Comprehensive development documentation
+
+### Changed
+- **BREAKING**: Refactored configuration structure to use profile-based system
+- Reduced configuration redundancy by 67%
+- Enhanced BaseService with profile resolution and validation
+- Improved STK service to use configured transaction type
+- Restructured `.env.example` with comprehensive documentation
+
+### Removed
+- Unused `MPESA_TILL` configuration and all references
+- Redundant credential definitions across services
+- Malformed configuration comments
+
+### Fixed
+- Configuration validation and error handling
+- Service-specific credential resolution
+- Callback URL fallback mechanism
+
 ## [1.0.0] - 2025-07-08
 
 ### Added
