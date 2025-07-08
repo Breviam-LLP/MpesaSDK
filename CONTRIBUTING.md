@@ -30,15 +30,41 @@ Enhancement suggestions are welcome! Please provide:
 
 ### Pull Requests
 
+Please follow our [Git Workflow](GIT_WORKFLOW.md) for detailed guidelines. Quick steps:
+
 1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Make** your changes
+2. **Create** a feature branch following our naming convention:
+   ```bash
+   git checkout develop
+   git checkout -b feature/descriptive-name
+   ```
+3. **Make** your changes following our coding standards
 4. **Add** tests for your changes
-5. **Ensure** all tests pass (`composer test`)
+5. **Ensure** all tests pass:
+   ```bash
+   composer test
+   # or
+   vendor/bin/phpunit
+   ```
 6. **Update** documentation if needed
-7. **Commit** your changes (`git commit -m 'Add some amazing feature'`)
-8. **Push** to the branch (`git push origin feature/amazing-feature`)
-9. **Open** a Pull Request
+7. **Commit** your changes using conventional commit format:
+   ```bash
+   git commit -m 'feat(scope): add some amazing feature'
+   ```
+8. **Push** to the branch:
+   ```bash
+   git push origin feature/descriptive-name
+   ```
+9. **Open** a Pull Request using our PR template
+
+### Commit Message Format
+
+We use [Conventional Commits](https://www.conventionalcommits.org/). See [GIT_WORKFLOW.md](GIT_WORKFLOW.md) for detailed guidelines.
+
+Examples:
+- `feat(stk): add timeout configuration for STK push`
+- `fix(auth): resolve token caching issue`
+- `docs: update configuration guide`
 
 ### Development Setup
 

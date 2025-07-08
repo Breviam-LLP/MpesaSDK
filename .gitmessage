@@ -1,0 +1,44 @@
+# <type>(<scope>): <description>
+#
+# Type must be one of:
+# - feat     (new feature)
+# - fix      (bug fix)
+# - docs     (documentation changes)
+# - style    (formatting, missing semi colons, etc; no code change)
+# - refactor (refactoring production code)
+# - test     (adding tests, refactoring test; no production code change)
+# - chore    (updating build tasks, package manager configs, etc; no production code change)
+# - perf     (performance improvements)
+# - ci       (CI/CD pipeline changes)
+# - build    (build system changes)
+# - revert   (revert previous commit)
+#
+# Scope is optional and should be the area of the codebase affected:
+# - auth, stk, c2b, b2c, b2b, balance, reversal, config, docs, tests, etc.
+#
+# Description should be imperative mood, present tense, lowercase, no period
+# Good: "add STK push timeout configuration"
+# Bad: "Added STK push timeout configuration."
+#
+# Examples:
+# feat(stk): add timeout configuration for STK push requests
+# fix(auth): resolve token caching issue in production
+# docs: update configuration guide with profile examples
+# refactor(config): implement profile-based credential system
+# test(stk): add comprehensive STK push validation tests
+# chore(deps): update Laravel framework to version 11
+#
+# --- COMMIT END ---
+# Remember to:
+# - Keep the first line under 50 characters
+# - Use the body to explain what and why vs. how
+# - Can use multiple lines to explain complex changes
+# - Reference issues and pull requests at the end
+#
+# Body (optional - leave blank line after subject):
+#
+#
+# Footer (optional - reference issues):
+# Fixes #123
+# Closes #456
+# Related to #789
