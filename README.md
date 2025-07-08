@@ -24,7 +24,10 @@ A comprehensive Laravel SDK for integrating with Safaricom's M-Pesa Daraja API. 
 ## Requirements
 
 - PHP 8.1+
-- Laravel 9.x, 10.x, or 11.x
+- Laravel 11.x (recommended)
+- Laravel 10.x (experimental support)
+
+> **Note**: For detailed Laravel version compatibility information, see [LARAVEL_COMPATIBILITY.md](LARAVEL_COMPATIBILITY.md)
 
 ## Installation
 

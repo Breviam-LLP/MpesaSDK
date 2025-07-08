@@ -10,25 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Profile-based configuration system with inheritance support
 - Comprehensive Git workflow and version control setup
-- GitHub Actions CI/CD pipeline
+- GitHub Actions CI/CD pipeline with Laravel version matrix testing
 - Pre-commit and commit message validation hooks
 - Configuration validation command (`mpesa:config-status`)
 - Enhanced callback URL management system
 - Comprehensive development documentation
+- Laravel compatibility guide (`LARAVEL_COMPATIBILITY.md`)
+- Experimental Laravel 10 support with proper CI handling
 
 ### Changed
 - **BREAKING**: Refactored configuration structure to use profile-based system
+- **BREAKING**: Dropped Laravel 9 support due to compatibility issues
 - Reduced configuration redundancy by 67%
 - Enhanced BaseService with profile resolution and validation
 - Improved STK service to use configured transaction type
 - Restructured `.env.example` with comprehensive documentation
+- Updated CI pipeline to handle experimental Laravel 10 tests gracefully
+- Made Codecov uploads conditional on test success and coverage file existence
 
 ### Removed
 - Unused `MPESA_TILL` configuration and all references
 - Redundant credential definitions across services
 - Malformed configuration comments
+- Laravel 9.x support from composer.json requirements
 
 ### Fixed
+- CI workflow Laravel 10 test handling with proper error management
+- Codecov upload failures when coverage.xml doesn't exist
+- Console command compatibility issues with Laravel 10
 - Configuration validation and error handling
 - Service-specific credential resolution
 - Callback URL fallback mechanism
