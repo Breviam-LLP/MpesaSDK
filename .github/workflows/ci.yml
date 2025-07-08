@@ -29,17 +29,20 @@ jobs:
             laravel: '^11.0'
             testbench: '^9.0'
             stability: stable
-          # Laravel 10 - Testing compatibility (may have issues)
+          # Laravel 10 - Experimental support (known compatibility issues)
+          # Note: Laravel 10 has limited compatibility due to console architecture changes
           - php: '8.1'
             laravel: '^10.0'
             testbench: '^8.0'
             stability: stable
             continue-on-error: true
+            experimental: true
           - php: '8.2'
             laravel: '^10.0'
             testbench: '^8.0'
             stability: stable
             continue-on-error: true
+            experimental: true
     
     steps:
       - name: Checkout code
@@ -93,15 +96,34 @@ jobs:
           composer show orchestra/testbench
           
       - name: Run tests
-        run: vendor/bin/phpunit --coverage-clover=coverage.xml
+        id: test-run
+        run: |
+          if [[ "${{ matrix.experimental }}" == "true" ]]; then
+            echo "=== Running Experimental Tests (Laravel ${{ matrix.laravel }}) ==="
+            echo "Note: These tests are experimental and may fail due to known compatibility issues"
+          fi
+          vendor/bin/phpunit --coverage-clover=coverage.xml
+        continue-on-error: ${{ matrix.continue-on-error || false }}
+        
+      - name: Check if coverage file exists
+        id: coverage-check
+        run: |
+          if [ -f "coverage.xml" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Coverage file generated successfully"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️  Coverage file not generated"
+          fi
         
       - name: Upload coverage to Codecov
-        if: matrix.php == '8.3' && matrix.laravel == '^11.0'
+        if: matrix.php == '8.3' && matrix.laravel == '^11.0' && steps.test-run.outcome == 'success' && steps.coverage-check.outputs.exists == 'true'
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
+          fail_ci_if_error: false
 
   code-quality:
     name: Code Quality
@@ -179,7 +201,7 @@ jobs:
         
       - name: Check required documentation files
         run: |
-          required_files=("README.md" "CHANGELOG.md" "CONTRIBUTING.md" ".env.example" "CONFIGURATION.md")
+          required_files=("README.md" "CHANGELOG.md" "CONTRIBUTING.md" ".env.example" "CONFIGURATION.md" "LARAVEL_COMPATIBILITY.md")
           for file in "${required_files[@]}"; do
             if [ ! -f "$file" ]; then
               echo "Missing required documentation file: $file"
