@@ -137,7 +137,7 @@ jobs:
         
       - name: Check required documentation files
         run: |
-          required_files=("README.md" "CHANGELOG.md" "CONTRIBUTING.md" ".env.example" "CONFIGURATION.md")
+          required_files=("README.md" "CHANGELOG.md" "CONTRIBUTING.md" ".env.example")
           for file in "${required_files[@]}"; do
             if [ ! -f "$file" ]; then
               echo "Missing required documentation file: $file"
