@@ -1,6 +1,7 @@
 {
     "name": "breviam/mpesa-sdk",
     "description": "Laravel SDK for M-Pesa Daraja API",
+    "version": "1.0.0",
     "type": "library",
     "license": "GPL-3.0-or-later",
     "autoload": {
