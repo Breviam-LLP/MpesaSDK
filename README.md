@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/breviam/mpesa-sdk.svg?style=flat-square)](https://packagist.org/packages/breviam/mpesa-sdk)
 [![Total Downloads](https://img.shields.io/packagist/dt/breviam/mpesa-sdk.svg?style=flat-square)](https://packagist.org/packages/breviam/mpesa-sdk)
-[![Tests](https://img.shields.io/github/workflow/status/breviam/mpesa-sdk/run-tests?label=tests)](https://github.com/breviam/mpesa-sdk/actions/workflows/run-tests.yml)
+[![Tests](https://img.shields.io/github/actions/workflow/status/Breviam-LLP/MpesaSDK/ci.yml?label=tests)](https://github.com/Breviam-LLP/MpesaSDK/actions/workflows/ci.yml)
 
 A comprehensive Laravel SDK for integrating with Safaricom's M-Pesa Daraja API. This package provides a clean, well-documented interface for all major M-Pesa services including STK Push, C2B, B2C, Transaction Status, and Account Balance.
 
