@@ -35,7 +35,7 @@ jobs:
             laravel: '^10.0'
             testbench: '^8.0'
             stability: stable
-            continue-on-error: true
+            continue_on_error: true
             experimental: true
           - php: '8.2'
             laravel: '^10.0'
@@ -103,7 +103,7 @@ jobs:
             echo "Note: These tests are experimental and may fail due to known compatibility issues"
           fi
           vendor/bin/phpunit --coverage-clover=coverage.xml
-        continue-on-error: ${{ matrix.continue-on-error || false }}
+        continue-on-error: ${{ matrix.continue_on_error || false }}
         
       - name: Check if coverage file exists
         id: coverage-check
